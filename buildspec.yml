@@ -84,6 +84,7 @@ phases:
     runtime-versions:
       python: 3.11
     commands:
+      - yum install -y jq
       - echo "Installing dependencies..."
       - pip install -r requirements.txt
       - echo "Installing SonarQube Scanner..."
@@ -95,12 +96,24 @@ phases:
     commands:
       - echo "Preparing environment..."
       - export SONAR_SCANNER_OPTS="-Xmx1024m"  # Optional: Memory settings
-      - echo "SonarQube configuration:"
+      - echo "Starting SonarQube scan..."
+      - sonar-scanner -Dsonar.projectKey=$Project -Dsonar.organization=$Organization -Dsonar.sources=.  -Dsonar.host.url=$HOST  -Dsonar.login=$LOGIN 
 
   build:
     commands:
-      - echo "Starting SonarQube scan..."
-      - sonar-scanner -Dsonar.projectKey=$Project -Dsonar.organization=$Organization -Dsonar.sources=.  -Dsonar.host.url=$HOST  -Dsonar.login=$LOGIN 
+      # Fetch Quality Gate status
+      - echo "Checking SonarQube Quality Gate status..."
+      - |
+        SONAR_STATUS=$(curl -s -u $LOGIN: "$HOST/api/qualitygates/project_status?projectKey=$Project" | jq -r '.projectStatus.status')
+        echo "Quality Gate status: $SONAR_STATUS"
+        if [ "$SONAR_STATUS" != "OK" ]; then
+          echo "Quality Gate FAILED. Exiting pipeline."
+          exit 1
+        else
+          echo "Quality Gate PASSED."
+        fi
+
+
       - echo "Running Django commands..."
       - python manage.py collectstatic --no-input
       - python manage.py migrate
