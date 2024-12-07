@@ -1,0 +1,5 @@
+django-widget-tweaks
+django
+xhtml2pdf
+gunicorn
+whitenoise

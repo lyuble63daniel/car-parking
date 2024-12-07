@@ -1,0 +1,57 @@
+{% load static %}
+<title>PIMS - Signup</title>
+<video loop muted autoplay playsinline class="video">
+  <source src="{% static 'classroom/css/home/css/parking.mp4' %}" type="video/mp4" />
+</video>
+<link href="{% static 'classroom/css/home/css/index.css' %}" rel="stylesheet">
+
+<div class="bg-heading">
+    <h2 class="w3-container w3-center w3-animate-zoom" style="font-size:35px">
+        Car Parking Information Management System
+    </h2>
+</div>
+
+<div class="box">
+    <h2>Signup Here</h2>
+    <form method="POST" action="{% url 'signup' %}">
+        {% csrf_token %}
+        
+        <!-- Display non-field errors -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                <ul>
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        
+        <!-- Display field-specific errors -->
+        {% for field in form %}
+            <div class="inputBox">
+                {{ field }}
+                {% if field.errors %}
+                    <div style="color: red;">
+                        {% for error in field.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <label>{{ field.label }}</label>
+            </div>
+        {% endfor %}
+
+        <!-- Add checkbox to sign up as admin -->
+        <div class="inputBox">
+            <input type="checkbox" name="is_admin" id="is_admin">
+            <label for="is_admin" style="margin-left: 10px;">Signup as Admin</label>
+        </div>
+
+        <input type="submit" name="sign-up" value="Sign Up">
+    </form>
+    <br>
+    <p style="text-align: center; margin-top: 10px;">
+        Already have an account? <a href="{% url 'login' %}" style="color: blue;">Login here</a>
+    </p>
+</div>
