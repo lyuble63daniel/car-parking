@@ -58,12 +58,12 @@ phases:
   build:
     commands:
       - echo "Starting SonarQube scan..."
-      - sonar-scanner \
-          -Dsonar.projectKey=$Project \
-          -Dsonar.organization=$Organization \
-          -Dsonar.sources=. \
-          -Dsonar.host.url=$HOST \
-          -Dsonar.login=$LOGIN
+      - |
+        sonar-scanner -Dsonar.projectKey=$Project \
+                      -Dsonar.organization=$Organization \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=$HOST \
+                      -Dsonar.login=$LOGIN
       - echo "Running Django commands..."
       - python manage.py collectstatic --no-input
       - python manage.py migrate
@@ -74,4 +74,5 @@ artifacts:
   files:
     - "**/*"
   discard-paths: no
+
 
