@@ -51,9 +51,9 @@ phases:
       - echo "Preparing environment..."
       - export SONAR_SCANNER_OPTS="-Xmx1024m"  # Optional: Memory settings
       - echo "SonarQube configuration:"
-      - echo "Host: $HOST"
-      - echo "Project: $Project"
-      - echo "Organization: $Organization"
+      # - echo "Host: $HOST"
+      # - echo "Project: $Project"
+      # - echo "Organization: $Organization"
 
   build:
     commands:
