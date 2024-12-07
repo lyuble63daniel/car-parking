@@ -1,25 +1,77 @@
+# version: 0.2
+# env:
+#   secrets-manager:
+#     LOGIN: prod/sonar:sonartoken
+#     HOST: prod/sonar:HOST
+#     Organization: prod/sonar:Organization
+#     Project: prod/sonar:Project
+# phases:
+#   install:
+#     runtime-versions:
+#       python: 3.11
+#     commands:
+#       - pip install -r requirements.txt
+#   build:
+#     commands:
+#       - ls -l 
+#       - pwd
+#       - ls
+#       - python manage.py collectstatic --no-input
+#       - python manage.py migrate
+#       - zip -r parking.zip . -x "*.git*" "*__pycache__*" "*.pyc" "*.pyo" "env/*"
+# artifacts:
+#   files:
+#     - "**/*"
+#   discard-paths: no
+
+
 version: 0.2
+
 env:
   secrets-manager:
-    LOGIN: prod/sonar:sonartoken
-    HOST: prod/sonar:HOST
-    Organization: prod/sonar:Organization
-    Project: prod/sonar:Project
+    LOGIN: prod/sonar:sonartoken     # SonarQube token
+    HOST: prod/sonar:HOST           # SonarQube server URL
+    Organization: prod/sonar:Organization  # Organization name in SonarQube
+    Project: prod/sonar:Project     # Project key in SonarQube
+
 phases:
   install:
     runtime-versions:
       python: 3.11
     commands:
+      - echo "Installing dependencies..."
       - pip install -r requirements.txt
+      - echo "Installing SonarQube Scanner..."
+      - wget -O sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+      - unzip sonar-scanner-cli.zip
+      - export PATH=$PATH:$(pwd)/sonar-scanner-5.0.1.3006-linux/bin
+
+  pre_build:
+    commands:
+      - echo "Preparing environment..."
+      - export SONAR_SCANNER_OPTS="-Xmx1024m"  # Optional: Memory settings
+      - echo "SonarQube configuration:"
+      - echo "Host: $HOST"
+      - echo "Project: $Project"
+      - echo "Organization: $Organization"
+
   build:
     commands:
-      - ls -l 
-      - pwd
-      - ls
+      - echo "Starting SonarQube scan..."
+      - sonar-scanner \
+          -Dsonar.projectKey=$Project \
+          -Dsonar.organization=$Organization \
+          -Dsonar.sources=. \
+          -Dsonar.host.url=$HOST \
+          -Dsonar.login=$LOGIN
+      - echo "Running Django commands..."
       - python manage.py collectstatic --no-input
       - python manage.py migrate
+      - echo "Zipping project for deployment..."
       - zip -r parking.zip . -x "*.git*" "*__pycache__*" "*.pyc" "*.pyo" "env/*"
+
 artifacts:
   files:
     - "**/*"
   discard-paths: no
+
