@@ -7,7 +7,7 @@ class User(AbstractUser):
     is_cashier = models.BooleanField(default=False)
 
     class Meta:
-        swappable = 'AUTH_USER_MODEL'
+        swappable = "AUTH_USER_MODEL"
 
 
 class Customer(models.Model):

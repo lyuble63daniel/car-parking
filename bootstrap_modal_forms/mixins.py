@@ -82,7 +82,7 @@ class PassRequestMixin(object):
 
     def get_form_kwargs(self):
         kwargs = super(PassRequestMixin, self).get_form_kwargs()
-        kwargs.update({'request': self.request})
+        kwargs.update({"request": self.request})
         return kwargs
 
 
@@ -97,7 +97,7 @@ class PopRequestMixin(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
+        self.request = kwargs.pop("request", None)
         super(PopRequestMixin, self).__init__(*args, **kwargs)
 
 
@@ -108,10 +108,11 @@ class CreateUpdateAjaxMixin(object):
 
     def save(self, commit=True):
         # Replace outdated is_ajax() check with modern header-based check
-        is_ajax_request = self.request.headers.get(
-            'x-requested-with') == 'XMLHttpRequest'
+        is_ajax_request = (
+            self.request.headers.get("x-requested-with") == "XMLHttpRequest"
+        )
 
-        if not is_ajax_request or self.request.POST.get('asyncUpdate') == 'True':
+        if not is_ajax_request or self.request.POST.get("asyncUpdate") == "True":
             instance = super(CreateUpdateAjaxMixin, self).save(commit=commit)
         else:
             instance = super(CreateUpdateAjaxMixin, self).save(commit=False)
@@ -135,8 +136,9 @@ class LoginAjaxMixin(object):
 
     def form_valid(self, form):
         # Replace outdated is_ajax() check with modern header-based check
-        is_ajax_request = self.request.headers.get(
-            'x-requested-with') == 'XMLHttpRequest'
+        is_ajax_request = (
+            self.request.headers.get("x-requested-with") == "XMLHttpRequest"
+        )
 
         if not is_ajax_request:
             auth_login(self.request, form.get_user())
