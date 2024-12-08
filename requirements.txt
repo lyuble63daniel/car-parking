@@ -3,3 +3,4 @@ django
 xhtml2pdf
 gunicorn
 whitenoise
+pylint
