@@ -101,49 +101,11 @@ phases:
 
   build:
     commands:
-      - echo "Polling SonarQube for Quality Gate status..."
+      # Fetch Quality Gate status
+      - echo "Checking SonarQube Quality Gate status..."
       - |
-        ANALYSIS_ID=""
-        MAX_RETRIES=10
-        SLEEP_TIME=10  # Wait time between retries (seconds)
-
-        # Fetch the analysis ID
-        echo "Fetching analysis ID..."
-        ANALYSIS_ID=$(curl -s -u $LOGIN: "$HOST/api/ce/component?component=$Project" | jq -r '.queue[0].taskId')
-
-        echo "Analysis ID: $ANALYSIS_ID"
-        if [ -z "$ANALYSIS_ID" ]; then
-          echo "Failed to fetch analysis ID. Exiting..."
-          exit 1
-        fi
-
-        # Wait for analysis to complete
-        for i in $(seq 1 $MAX_RETRIES); do
-          STATUS=$(curl -s -u $LOGIN: "$HOST/api/ce/task?id=$ANALYSIS_ID" | jq -r '.task.status')
-          echo "Attempt $i: Analysis status = $STATUS"
-
-          if [ "$STATUS" == "SUCCESS" ]; then
-            echo "Analysis completed. Checking Quality Gate status..."
-            break
-          fi
-
-          if [ "$STATUS" == "FAILED" ]; then
-            echo "Analysis failed on SonarQube server."
-            exit 1
-          fi
-
-          if [ $i -eq $MAX_RETRIES ]; then
-            echo "Analysis did not complete in time. Exiting..."
-            exit 1
-          fi
-
-          sleep $SLEEP_TIME
-        done
-
-        # Check Quality Gate status
         SONAR_STATUS=$(curl -s -u $LOGIN: "$HOST/api/qualitygates/project_status?projectKey=$Project" | jq -r '.projectStatus.status')
         echo "Quality Gate status: $SONAR_STATUS"
-
         if [ "$SONAR_STATUS" != "OK" ]; then
           echo "Quality Gate FAILED. Exiting pipeline."
           exit 1
