@@ -108,7 +108,8 @@ class CreateUpdateAjaxMixin(object):
 
     def save(self, commit=True):
         # Replace outdated is_ajax() check with modern header-based check
-        is_ajax_request = self.request.headers.get('x-requested-with') == 'XMLHttpRequest'
+        is_ajax_request = self.request.headers.get(
+            'x-requested-with') == 'XMLHttpRequest'
 
         if not is_ajax_request or self.request.POST.get('asyncUpdate') == 'True':
             instance = super(CreateUpdateAjaxMixin, self).save(commit=commit)
@@ -134,7 +135,8 @@ class LoginAjaxMixin(object):
 
     def form_valid(self, form):
         # Replace outdated is_ajax() check with modern header-based check
-        is_ajax_request = self.request.headers.get('x-requested-with') == 'XMLHttpRequest'
+        is_ajax_request = self.request.headers.get(
+            'x-requested-with') == 'XMLHttpRequest'
 
         if not is_ajax_request:
             auth_login(self.request, form.get_user())

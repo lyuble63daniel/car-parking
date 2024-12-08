@@ -1,16 +1,15 @@
 """
 """
 
-from pathlib import Path
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-TEMPLATE_DIR = os.path.join(BASE_DIR,'templates')
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 
 
-STATIC_DIR=os.path.join(BASE_DIR,'static')
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -36,7 +35,7 @@ INSTALLED_APPS = [
     'classroom',
     'bootstrap_modal_forms',
     'widget_tweaks',
-    
+
 ]
 
 MIDDLEWARE = [
@@ -78,7 +77,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        
+
     }
 }
 
@@ -136,13 +135,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-#LOGIN_URL = 'home_url'
-#LOGIN_REDIRECT_URL = 'home'
+# LOGIN_URL = 'home_url'
+# LOGIN_REDIRECT_URL = 'home'
 
 
-
-#LOGIN_URL = 'home'
-#LOGIN_REDIRECT_URL = 'home'
+# LOGIN_URL = 'home'
+# LOGIN_REDIRECT_URL = 'home'
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

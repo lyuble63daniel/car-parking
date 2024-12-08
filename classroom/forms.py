@@ -10,8 +10,6 @@
 # # from django.dispatch import receiver
 
 
-
-
 # # class CustomerForm(BSModalModelForm):
 # #     def __init__(self, *args, **kwargs):
 # #         super(CustomerForm, self).__init__(*args, **kwargs)
@@ -35,15 +33,13 @@
 # #         }
 # #         self.fields['comment'].widget.attrs = {
 # #             'class': 'form-control col-md-6'
-# #         } 
+# #         }
 # #         self.fields['is_payed'].widget.attrs = {
 # #             'class': 'form-control col-md-6'
 # #         }
 # #     class Meta:
 # #         model = Customer
 # #         fields = ('first_name', 'last_name', 'car_model', 'car_color', 'cost_per_day', 'phone_number', 'comment', 'is_payed')
-
-
 
 
 # # class UserForm(BSModalModelForm):
@@ -185,11 +181,12 @@ class CustomerForm(BSModalModelForm):
     def __init__(self, *args, **kwargs):
         super(CustomerForm, self).__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control col-md-6'})
+            self.fields[field].widget.attrs.update(
+                {'class': 'form-control col-md-6'})
 
     class Meta:
         model = Customer
-        fields = ('first_name', 'last_name', 'car_model', 'car_color', 
+        fields = ('first_name', 'last_name', 'car_model', 'car_color',
                   'cost_per_day', 'phone_number', 'comment', 'is_payed')
 
 
@@ -198,7 +195,8 @@ class UserForm(BSModalModelForm):
     def __init__(self, *args, **kwargs):
         super(UserForm, self).__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control col-md-6'})
+            self.fields[field].widget.attrs.update(
+                {'class': 'form-control col-md-6'})
 
     class Meta:
         model = User
@@ -222,13 +220,17 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = User  # Use your custom user model
-        fields = ('username', 'email', 'first_name', 'last_name', 'password1', 'password2')
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'password1', 'password2')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs.update({'class': 'form-control col-md-6', 'placeholder': 'Username'})
-        self.fields['password1'].widget.attrs.update({'class': 'form-control col-md-6', 'placeholder': 'Password'})
-        self.fields['password2'].widget.attrs.update({'class': 'form-control col-md-6', 'placeholder': 'Confirm Password'})
+        self.fields['username'].widget.attrs.update(
+            {'class': 'form-control col-md-6', 'placeholder': 'Username'})
+        self.fields['password1'].widget.attrs.update(
+            {'class': 'form-control col-md-6', 'placeholder': 'Password'})
+        self.fields['password2'].widget.attrs.update(
+            {'class': 'form-control col-md-6', 'placeholder': 'Confirm Password'})
 
     def save(self, commit=True):
         user = super().save(commit=False)

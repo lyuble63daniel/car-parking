@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib.auth import REDIRECT_FIELD_NAME, get_user_model, login as auth_login
+from django.contrib.auth import REDIRECT_FIELD_NAME, login as auth_login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponseRedirect

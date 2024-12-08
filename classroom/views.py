@@ -1,38 +1,23 @@
+from classroom.models import User  # Your custom user model
+from .forms import CustomUserCreationForm
+from django.contrib.auth import login as auth_login
+from django.shortcuts import render, redirect
+from bootstrap_modal_forms.mixins import PopRequestMixin, CreateUpdateAjaxMixin
 from django.shortcuts import redirect, render
-from django.views.generic import TemplateView
-from django.contrib import auth
 from django.contrib.auth import authenticate
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 from django.contrib.auth import logout
 from django.urls import reverse_lazy
-from django.views import generic
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, DetailView 
-from django.contrib.messages.views import SuccessMessageMixin
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic import ListView
 from django.http import HttpResponse
 from .forms import CustomerForm, UserForm
-from django.http import HttpResponseRedirect, HttpResponse
-from django.template import loader
-from django.http import Http404
-from django.urls import reverse
-from django.views import generic
+from django.http import HttpResponse
 from django.utils import timezone
-from django.core import serializers
-from django.conf import settings
-import os
-from .models import Customer,User
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.contrib import auth
-from datetime import datetime, date
-from django.core.exceptions import ValidationError
-from . import models
-import operator
-import itertools
+from .models import Customer, User
+from datetime import datetime
 from django.db.models import Sum
 from django.contrib.auth.mixins import LoginRequiredMixin
 from io import BytesIO
@@ -41,9 +26,6 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.contrib.auth.hashers import make_password
 from bootstrap_modal_forms.generic import (
-    BSModalLoginView,
-    BSModalFormView,
-    BSModalCreateView,
     BSModalUpdateView,
     BSModalReadView,
     BSModalDeleteView
@@ -54,14 +36,15 @@ from bootstrap_modal_forms.generic import (
 #     return render(request, 'dashboard/login.html')
 
 
-
 from django.http import JsonResponse
 from bootstrap_modal_forms.mixins import PopRequestMixin
+
 
 class CustomModalUpdateView(PopRequestMixin, BSModalUpdateView):
     """
     Custom UpdateView to replace the outdated is_ajax() check
     """
+
     def form_valid(self, form):
         response = super().form_valid(form)
 
@@ -70,8 +53,6 @@ class CustomModalUpdateView(PopRequestMixin, BSModalUpdateView):
             return JsonResponse({'success': True, 'message': 'Data updated successfully!'})
         return response
 
-
-from bootstrap_modal_forms.mixins import PopRequestMixin
 
 class FixedPopRequestMixin(PopRequestMixin):
     def save(self, commit=True):
@@ -82,11 +63,7 @@ class FixedPopRequestMixin(PopRequestMixin):
         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest' or self.request.POST.get('asyncUpdate') == 'True':
             return super().save(commit=commit)
         return super().save(commit=commit)
-    
 
-
-from bootstrap_modal_forms.mixins import PopRequestMixin, CreateUpdateAjaxMixin
-from django.http import JsonResponse
 
 class CustomCreateUpdateAjaxMixin(CreateUpdateAjaxMixin):
     def save(self, commit=True):
@@ -94,24 +71,19 @@ class CustomCreateUpdateAjaxMixin(CreateUpdateAjaxMixin):
         Override 'save' to replace is_ajax with Django 5 compatible code.
         """
         # Replace deprecated is_ajax() with modern alternative
-        is_async_update = self.request.headers.get('x-requested-with') == 'XMLHttpRequest'
+        is_async_update = self.request.headers.get(
+            'x-requested-with') == 'XMLHttpRequest'
         if not is_async_update or self.request.POST.get('asyncUpdate') == 'True':
             return super().save(commit=commit)
         else:
             return JsonResponse({'error': 'AJAX requests only.'})
-        
 
-
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth import login as auth_login
-from .forms import CustomUserCreationForm
-from classroom.models import User  # Your custom user model
 
 def signup(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
-        is_admin = request.POST.get('is_admin')  # Checkbox or hidden input to detect admin role
+        # Checkbox or hidden input to detect admin role
+        is_admin = request.POST.get('is_admin')
         if form.is_valid():
             user = form.save(commit=False)
             if is_admin:  # If admin checkbox is selected
@@ -119,13 +91,14 @@ def signup(request):
                 user.is_superuser = True  # Makes the user a superuser
             user.save()
             auth_login(request, user)
-            messages.success(request, f"Account created successfully! Welcome, {user.username}")
+            messages.success(
+                request, f"Account created successfully! Welcome, {user.username}")
             return redirect('dashboard')
         else:
             messages.error(request, "Please correct the errors below.")
     else:
         form = CustomUserCreationForm()
-    
+
     return render(request, 'dashboard/signup.html', {'form': form})
 
 
@@ -146,7 +119,7 @@ def signup(request):
 #             messages.error(request, "Please correct the errors below.")
 #     else:
 #         form = CustomUserCreationForm()
-    
+
 #     return render(request, 'dashboard/signup.html', {'form': form})
 
 
@@ -154,6 +127,7 @@ def home(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     return redirect('signup')
+
 
 def dashboard(request):
     total_it = Customer.objects.aggregate(Sum("total_cost"))
@@ -166,9 +140,9 @@ def dashboard(request):
     cars = Customer.objects.all().count()
     users = User.objects.all().count()
 
-
-    context = {'total_cost':total_cost, 'users':users, 'cars':cars}
+    context = {'total_cost': total_cost, 'users': users, 'cars': cars}
     return render(request, 'dashboard/dashboard.html', context)
+
 
 def login(request):
     if request.method == 'POST':
@@ -182,22 +156,24 @@ def login(request):
             elif user.is_cashier:
                 return redirect('dashboard')
             else:
-                return redirect('dashboard')  # Default redirect for normal users
+                # Default redirect for normal users
+                return redirect('dashboard')
         else:
             messages.error(request, 'Wrong Username or Password')
             return redirect('login')
     else:
         # Handle GET request and render the login form
-        return render(request, 'dashboard/login.html')      
+        return render(request, 'dashboard/login.html')
+
 
 def logout_view(request):
     logout(request)
-    return redirect('/')                
+    return redirect('/')
 
 
 def add_vehicle(request):
     choice = ['1', '0', 10000, 15000, 'Accomodation Fee', 'Verified All Spare']
-    choice = {'choice':choice}
+    choice = {'choice': choice}
     return render(request, 'dashboard/add_vehicle.html', choice)
 
 
@@ -216,7 +192,8 @@ def save_vehicle(request):
         current_time = datetime.now()
         date_time = current_time.strftime("%Y,%m,%d")
 
-        a = Customer(first_name=first_name, last_name=last_name, card_number=card_number, car_model=car_model, car_color=car_color, reg_date=date_time,register_name=register_name,comment=comment, cost_per_day=cost_per_day, device=device)
+        a = Customer(first_name=first_name, last_name=last_name, card_number=card_number, car_model=car_model, car_color=car_color,
+                     reg_date=date_time, register_name=register_name, comment=comment, cost_per_day=cost_per_day, device=device)
         a.save()
         messages.success(request, 'Vehicle Registered Successfully')
         return redirect('vehicle')
@@ -242,7 +219,6 @@ class UserView(ListView):
         return User.objects.order_by('-id')
 
 
-
 class Vehicle(ListView):
     model = Customer
     template_name = 'dashboard/list_vehicle.html'
@@ -253,14 +229,12 @@ class Vehicle(ListView):
         return Customer.objects.filter(is_payed="False")
 
 
-
 class UserUpdateView(BSModalUpdateView):
     model = User
     template_name = 'dashboard/u_update.html'
     form_class = UserForm
     success_message = 'Success: Data was updated.'
     success_url = reverse_lazy('users')
-
 
 
 class VehicleReadView(BSModalReadView):
@@ -272,6 +246,7 @@ class CarReadView(BSModalReadView):
     model = Customer
     template_name = 'dashboard/view_vehicle2.html'
 
+
 class UserReadView(BSModalReadView):
     model = User
     template_name = 'dashboard/view_user.html'
@@ -281,6 +256,8 @@ class UserReadView(BSModalReadView):
 #     template_name = 'dashboard/update_vehicle.html'
 #     form_class = CustomerForm
 #     success_url = reverse_lazy('vehicle')
+
+
 class VehicleUpdateView(BSModalUpdateView):
     model = Customer
     template_name = 'dashboard/update_vehicle.html'
@@ -291,7 +268,8 @@ class VehicleUpdateView(BSModalUpdateView):
         # Log the update for debugging
         print("Form is valid and being saved.")
         return super().form_valid(form)
-    
+
+
 class CarUpdateView(BSModalUpdateView):
     model = Customer
     template_name = 'dashboard/update_vehicle2.html'
@@ -299,13 +277,11 @@ class CarUpdateView(BSModalUpdateView):
     success_url = reverse_lazy('listvehicle')
 
 
-
 class VehicleDeleteView(BSModalDeleteView):
     model = Customer
     template_name = 'dashboard/delete_vehicle.html'
     form_class = CustomerForm
     success_url = reverse_lazy('vehicle')
-
 
 
 class CarDeleteView(BSModalDeleteView):
@@ -317,10 +293,10 @@ class CarDeleteView(BSModalDeleteView):
 
 
 def Pay(request, pk):
-    Customer.objects.filter(id = pk).update(exit_date = timezone.now())
-    Customer.objects.filter(id = pk).update(is_payed = "True")
-    reg_date = Customer.objects.values_list('reg_date').filter(id = pk)
-    exit_date = Customer.objects.values_list('exit_date').filter(id = pk)
+    Customer.objects.filter(id=pk).update(exit_date=timezone.now())
+    Customer.objects.filter(id=pk).update(is_payed="True")
+    reg_date = Customer.objects.values_list('reg_date').filter(id=pk)
+    exit_date = Customer.objects.values_list('exit_date').filter(id=pk)
 
     a = str(reg_date)
     b = str(exit_date)
@@ -334,7 +310,6 @@ def Pay(request, pk):
     myTime = datetime.strptime(date_time_str, "%Y, %m, %d, %H, %M, %S, %f")
     myTime2 = datetime.strptime(date_time_str2, "%Y, %m, %d, %H, %M, %S, %f")
 
-
     myFormat = ("%Y,%m,%d")
     new_reg_date = myTime.strftime(myFormat)
     new_exit_date = myTime2.strftime(myFormat)
@@ -342,39 +317,38 @@ def Pay(request, pk):
     d2 = myTime2.date()
     d1 = myTime.date()
 
-    delta = d2 -d1
+    delta = d2 - d1
     mo = delta.days
 
     if mo == 0:
-        mo =1
+        mo = 1
     else:
         mo = mo
 
-    Customer.objects.filter(id = pk).update(days_spent = mo)
-    cost_per_day = Customer.objects.values_list('cost_per_day').filter(id = pk)
-    days_spent = Customer.objects.values_list('days_spent').filter(id = pk)
+    Customer.objects.filter(id=pk).update(days_spent=mo)
+    cost_per_day = Customer.objects.values_list('cost_per_day').filter(id=pk)
+    days_spent = Customer.objects.values_list('days_spent').filter(id=pk)
 
     cpd = str(cost_per_day)
     cpd = cpd[12:-7]
 
     if cpd == str(15):
-       cost_per_day = 15000
-       total_cost = cost_per_day * mo
-       Customer.objects.filter(id = pk).update(total_cost = total_cost)
-       messages.success(request, 'Payment Was Finished Successfully')
-       return redirect('listvehicle')
+        cost_per_day = 15000
+        total_cost = cost_per_day * mo
+        Customer.objects.filter(id=pk).update(total_cost=total_cost)
+        messages.success(request, 'Payment Was Finished Successfully')
+        return redirect('listvehicle')
     else:
         cost_per_day = 10000
         total_cost = cost_per_day * mo
-        Customer.objects.filter(id = pk).update(total_cost = total_cost)
+        Customer.objects.filter(id=pk).update(total_cost=total_cost)
         messages.success(request, 'Payment Was Finished Successfully')
-        return redirect('listvehicle')   
-
+        return redirect('listvehicle')
 
 
 def render_to_pdf(template_src, context_dict={}):
     template = get_template(template_src)
-    html  = template.render(context_dict)
+    html = template.render(context_dict)
     result = BytesIO()
     pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
     if not pdf.err:
@@ -382,30 +356,30 @@ def render_to_pdf(template_src, context_dict={}):
     return None
 
 
-
 class GeneratePdf(ListView):
     def get(self, request, pk, *args, **kwargs):
-        #info = Customer.objects.filter(id=pk)
-        infos = Customer.objects.filter(id=pk).values('id','first_name','last_name','total_cost','days_spent', 'reg_date', 'exit_date', 'card_number')
+        # info = Customer.objects.filter(id=pk)
+        infos = Customer.objects.filter(id=pk).values(
+            'id', 'first_name', 'last_name', 'total_cost', 'days_spent', 'reg_date', 'exit_date', 'card_number')
         print(infos)
         context = {
-        "data": {
-            'today': 'Today', 
-             'amount': 39.99,
-            'customer_name': 'Cooper Mann',
-            'order_id': 1233434,
-            'location': 'MoTech Tower, Ilala',
-            'address': 'P.Box 122 Dar Es Salaam',
-            'email': 'info@motechapp.com',
-        },
-        "infos": infos,
+            "data": {
+                'today': 'Today',
+                'amount': 39.99,
+                'customer_name': 'Cooper Mann',
+                'order_id': 1233434,
+                'location': 'MoTech Tower, Ilala',
+                'address': 'P.Box 122 Dar Es Salaam',
+                'email': 'info@motechapp.com',
+            },
+            "infos": infos,
         }
 
         pdf = render_to_pdf('dashboard/invoice.html', context)
         return HttpResponse(pdf, content_type='application/pdf')
 
 
-class GeneratePDF(LoginRequiredMixin,ListView):
+class GeneratePDF(LoginRequiredMixin, ListView):
     def get(self, request, *args, **kwargs):
         template = get_template('invoice.html')
         context = {
@@ -418,11 +392,11 @@ class GeneratePDF(LoginRequiredMixin,ListView):
         pdf = render_to_pdf('dashboard/invoice.html', context)
         if pdf:
             response = HttpResponse(pdf, content_type='application/pdf')
-            filename = "Invoice_%s.pdf" %("12341231")
-            content = "inline; filename='%s'" %(filename)
+            filename = "Invoice_%s.pdf" % ("12341231")
+            content = "inline; filename='%s'" % (filename)
             download = request.GET.get("download")
             if download:
-                content = "attachment; filename='%s'" %(filename)
+                content = "attachment; filename='%s'" % (filename)
             response['Content-Disposition'] = content
             return response
         return HttpResponse("Not found")
@@ -435,184 +409,41 @@ class DeleteUser(BSModalDeleteView):
     success_url = reverse_lazy('users')
 
 
-
 def create(request):
     choice = ['1', '0', 5000, 10000, 15000, 'Register', 'Admin', 'Cashier']
     choice = {'choice': choice}
     if request.method == 'POST':
-            first_name=request.POST['first_name']
-            last_name=request.POST['last_name']
-            username=request.POST['username']
-            userType=request.POST['userType']
-            email=request.POST['email']
-            password=request.POST['password']
-            password = make_password(password)
-            print("User Type")
-            print(userType)
-            if userType == "Register":
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, is_register=True)
-                a.save()
-                messages.success(request, 'Member was created successfully!')
-                return redirect('users')
-            elif userType == "Cashier":
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, is_cashier=True)
-                a.save()
-                messages.success(request, 'Member was created successfully!')
-                return redirect('users')
-            elif userType == "Admin":
-                a = User(first_name=first_name, last_name=last_name, username=username, email=email, password=password, is_admin=True)
-                a.save()
-                messages.success(request, 'Member was created successfully!')
-                return redirect('users')    
-            else:
-                messages.success(request, 'Member was not created')
-                return redirect('users')
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        username = request.POST['username']
+        userType = request.POST['userType']
+        email = request.POST['email']
+        password = request.POST['password']
+        password = make_password(password)
+        print("User Type")
+        print(userType)
+        if userType == "Register":
+            a = User(first_name=first_name, last_name=last_name,
+                     username=username, email=email, password=password, is_register=True)
+            a.save()
+            messages.success(request, 'Member was created successfully!')
+            return redirect('users')
+        elif userType == "Cashier":
+            a = User(first_name=first_name, last_name=last_name,
+                     username=username, email=email, password=password, is_cashier=True)
+            a.save()
+            messages.success(request, 'Member was created successfully!')
+            return redirect('users')
+        elif userType == "Admin":
+            a = User(first_name=first_name, last_name=last_name,
+                     username=username, email=email, password=password, is_admin=True)
+            a.save()
+            messages.success(request, 'Member was created successfully!')
+            return redirect('users')
+        else:
+            messages.success(request, 'Member was not created')
+            return redirect('users')
     else:
         choice = ['1', '0', 5000, 10000, 15000, 'Register', 'Admin', 'Cashier']
         choice = {'choice': choice}
         return render(request, 'dashboard/add.html', choice)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   
-
-
-

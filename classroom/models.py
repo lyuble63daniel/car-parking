@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.utils.html import escape, mark_safe
 
 
 class User(AbstractUser):
@@ -27,5 +26,4 @@ class Customer(models.Model):
     register_name = models.CharField(max_length=100)
     card_number = models.CharField(max_length=100)
     reg_date = models.DateTimeField(auto_now_add=True)
-    exit_date = models.DateTimeField(null=True, blank=True)    
-
+    exit_date = models.DateTimeField(null=True, blank=True)
