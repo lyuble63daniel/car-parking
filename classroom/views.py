@@ -30,8 +30,6 @@ from .models import Customer, User
 #     return render(request, 'dashboard/login.html')
 
 
-
-
 class CustomModalUpdateView(PopRequestMixin, BSModalUpdateView):
     """
     Custom UpdateView to replace the outdated is_ajax() check
